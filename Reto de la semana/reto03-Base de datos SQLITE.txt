@@ -1,0 +1,38 @@
+SELECT ID_MaterialConstruccion AS "ID" , Nombre_Material AS "Nombre", Precio_Unidad AS "Precio"
+FROM MaterialConstruccion 
+WHERE importado = "No" 
+ORDER BY Nombre_Material ;
+
+SELECT ID_Proyecto AS "ID", Constructora , Ciudad , Clasificacion ,
+(SELECT Estrato FROM Tipo WHERE TIPO.ID_Tipo = Proyecto.ID_Tipo) AS "Estrato",
+(SELECT Nombre || " " || Primer_Apellido || " " || Segundo_Apellido FROM Lider WHERE Lider.ID_Lider = Proyecto.ID_Lider) AS "Lider"
+FROM Proyecto
+WHERE  Banco_VInculado = "Davivienda" 
+ORDER BY Fecha_Inicio DESC , Ciudad , Constructora;
+
+SELECT Ciudad, Clasificacion, COUNT (Clasificacion) AS "Total", MIN(Fecha_Inicio) AS "Antiguedad", MAX(Fecha_Inicio) AS "Reciente"  
+FROM Proyecto 
+WHERE Clasificacion = "Casa Campestre" OR Clasificacion = "Condominio"  
+GROUP BY Ciudad, Clasificacion  
+ORDER BY Ciudad, Clasificacion;
+
+SELECT Compra.ID_Proyecto , SUM(mc.Precio_Unidad * Compra.Cantidad ) AS "valor"
+FROM Compra 
+INNER JOIN MaterialConstruccion mc 
+ON mc.ID_MaterialConstruccion = Compra.ID_MaterialConstruccion 
+WHERE Compra.Pagado = 'Si'
+GROUP BY Compra.ID_Proyecto 
+HAVING Valor > 50000
+ORDER BY Valor DESC;
+
+SELECt (Lider.Nombre || " " || Lider.Primer_Apellido || " " || Lider.Segundo_Apellido )as Lider, SUM(mc.Precio_Unidad * Compra.Cantidad ) AS "Valor" 
+FROM Lider 
+INNER JOIN Proyecto
+ON Proyecto.ID_Lider  = Lider.ID_Lider 
+INNER JOIN Compra 
+ON Proyecto.ID_Proyecto = Compra.ID_Proyecto
+INNER JOIN MaterialConstruccion mc 
+ON mc.ID_MaterialConstruccion = Compra.ID_MaterialConstruccion  
+GROUP BY Lider.ID_Lider 
+ORDER by Valor ASC
+LIMIT 10;
